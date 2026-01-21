@@ -1,0 +1,20 @@
+[
+    {
+        "id": 1,
+        "name": "cinematic_clips_01",
+        "platform": "tiktok",
+        "niche": "movie_cuts",
+        "proxy": "http://user:pass@host:port",
+        "browser_profile_path": "profiles/tk_movie_01",
+        "status": "active"
+    },
+    {
+        "id": 2,
+        "name": "ai_animals_daily",
+        "platform": "instagram",
+        "niche": "ai_images",
+        "proxy": "http://user:pass@host:port",
+        "browser_profile_path": "profiles/ig_ai_01",
+        "status": "active"
+    }
+]

@@ -13,21 +13,22 @@ class Dispatcher:
             with open(self.queue_file, 'w') as f:
                 json.dump([], f)
 
-    def add_task(self, task_type: str, data: dict, status: str = "pending"):
-        """Добавляет новую задачу в конвейер."""
+    def add_task(self, task_type: str, data: dict, status: str = "pending", account_id: int = None):
+        """Добавляет новую задачу в конвейер с привязкой к аккаунту."""
         with open(self.queue_file, 'r+') as f:
             queue = json.load(f)
             new_task = {
                 "id": len(queue) + 1,
                 "type": task_type,
                 "status": status,
+                "account_id": account_id,
                 "data": data,
                 "created_at": datetime.now().isoformat()
             }
             queue.append(new_task)
             f.seek(0)
             json.dump(queue, f, indent=4)
-        print(f"[Dispatcher] Добавлена задача: {task_type} (Статус: {status})")
+        print(f"[Dispatcher] Добавлена задача: {task_type} для аккаунта: {account_id}")
 
     def approve_task(self, task_id: int):
         """Одобряет задачу, переводя её в статус 'pending' для следующего бота."""
