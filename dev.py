@@ -75,18 +75,35 @@ def test_uploader():
     disp.add_task("upload_video", {"file_path": file_path, "caption": caption}, account_id=account_id)
     bot.run()
 
+def test_audio_bot():
+    print("--- Тест создания 8D звука ---")
+    file_path = input("Введите путь к аудио файлу (mp3/wav): ")
+    if not os.path.exists(file_path):
+        print("Файл не найден!")
+        return
+        
+    disp = Dispatcher(project_root)
+    bot = AudioBot(disp)
+    result = bot.create_8d_effect(file_path)
+    if result:
+        print(f"Готово! 8D версия здесь: {result}")
+    else:
+        print("Ошибка при обработке аудио.")
+
 if __name__ == "__main__":
     from bots.editor_bot.editor import EditorBot
     from bots.script_bot.script_writer import ScriptBot
     from bots.uploader_bot.uploader import UploaderBot
+    from bots.audio_bot.audio_processor import AudioBot
     while True:
         print("\n--- DEV MENU ---")
         print("1. Тест скачивания видео")
         print("2. Тест монтажа видео (EditorBot)")
         print("3. Тест генерации описания (ScriptBot/OpenAI)")
         print("4. Тест загрузки видео (UploaderBot)")
-        print("5. Показать очередь задач")
-        print("6. Выход")
+        print("5. Тест 8D звука (AudioBot)")
+        print("6. Показать очередь задач")
+        print("7. Выход")
         choice = input("Выберите действие: ")
         
         if choice == "1":
@@ -98,8 +115,10 @@ if __name__ == "__main__":
         elif choice == "4":
             test_uploader()
         elif choice == "5":
-            show_queue()
+            test_audio_bot()
         elif choice == "6":
+            show_queue()
+        elif choice == "7":
             break
         else:
             print("Неверный выбор.")

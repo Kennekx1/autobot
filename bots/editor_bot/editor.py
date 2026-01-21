@@ -10,59 +10,46 @@ class EditorBot(BaseBot):
         self.output_dir = "/home/usic/.gemini/antigravity/scratch/autobot/data/processed_videos"
         os.makedirs(self.output_dir, exist_ok=True)
 
-    def process_video(self, input_path: str, segment_duration: int = 120):
+    def overlay_music(self, video_path: str, music_path: str, video_volume: float = 0.3, music_volume: float = 1.0):
         """
-        Нарезает видео на сегменты, меняет формат на 9:16 и применяет эффекты.
+        Накладывает фоновую музыку на видео.
+        video_volume: громкость оригинального звука (0.3 = 30%)
+        music_volume: громкость накладываемой музыки
         """
-        self.logger.info(f"Начало обработки видео: {input_path}")
-        
+        self.logger.info(f"Наложение музыки {music_path} на {video_path}")
         try:
-            clip = VideoFileClip(input_path)
-            duration = clip.duration
-            filename_base = os.path.basename(input_path).split('.')[0]
+            from moviepy import AudioFileClip
+            video_clip = VideoFileClip(video_path)
+            music_clip = AudioFileClip(music_path)
             
-            # 1. Приведение к формату 9:16
-            # Если видео горизонтальное, обрезаем края
-            target_ratio = 9/16
-            w, h = clip.size
-            current_ratio = w/h
+            # Зацикливаем музыку или обрезаем под длину видео
+            if music_clip.duration < video_clip.duration:
+                # Если музыка короче видео, зацикливаем (через повторение сегмента)
+                repeats = int(video_clip.duration / music_clip.duration) + 1
+                from moviepy import concatenate_audioclips
+                music_clip = concatenate_audioclips([music_clip] * repeats)
             
-            if current_ratio > target_ratio:
-                # Видео слишком широкое (горизонтальное) - обрезаем по бокам
-                new_w = h * target_ratio
-                clip = clip.cropped(x_center=w/2, width=new_w)
-            elif current_ratio < target_ratio:
-                # Видео слишком узкое - обрезаем сверху/снизу (редко)
-                new_h = w / target_ratio
-                clip = clip.cropped(y_center=h/2, height=new_h)
+            music_clip = music_clip.subclipped(0, video_clip.duration)
             
-            # Масштабируем до стандартного вертикального размера (опционально, например 1080x1920)
-            clip = clip.resized(height=1920) if clip.h < 1920 else clip
+            # Регулируем громкость
+            new_video_audio = video_clip.audio.with_volume_scaled(video_volume)
+            new_music_audio = music_clip.with_volume_scaled(music_volume)
             
-            # 2. Нарезка на сегменты
-            segments = []
-            for start_t in range(0, int(duration), segment_duration):
-                end_t = min(start_t + segment_duration, duration)
-                if end_t - start_t < 10: # Пропускаем слишком короткие хвосты
-                    continue
-                    
-                output_filename = f"{filename_base}_part_{start_t}.mp4"
-                output_path = os.path.join(self.output_dir, output_filename)
-                
-                # Вырезаем кусок
-                subclip = clip.subclipped(start_t, end_t)
-                
-                # 3. Эффекты для уникализации
-                # Слегка увеличиваем (зум 5%) и добавляем микро-ускорение (1.01)
-                subclip = subclip.resized(1.05)
-                subclip = subclip.with_effects([vfx.MultiplySpeed(1.01)])
-                
-                self.logger.info(f"Сохранение сегмента: {output_filename}")
-                subclip.write_videofile(output_path, codec="libx264", audio_codec="aac", fps=30)
-                segments.append(output_path)
-                
-            clip.close()
-            return segments
+            # Смешиваем аудио
+            from moviepy import CompositeAudioClip
+            final_audio = CompositeAudioClip([new_video_audio, new_music_audio])
+            
+            final_clip = video_clip.with_audio(final_audio)
+            
+            output_path = video_path.replace(".mp4", "_epic.mp4")
+            final_clip.write_videofile(output_path, codec="libx264", audio_codec="aac", fps=30)
+            
+            video_clip.close()
+            music_clip.close()
+            return output_path
+        except Exception as e:
+            self.logger.error(f"Ошибка при смешивании музыки: {e}")
+            return video_path
             
         except Exception as e:
             self.logger.error(f"Ошибка при обработке: {e}")
