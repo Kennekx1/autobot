@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autobot Content Factory | Control Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --accent: #a855f7;
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --text: #f8fafc;
+            --success: #22c55e;
+            --warning: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 80%, rgba(168, 85, 247, 0.15) 0%, transparent 40%);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .logo {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .status-badge {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            font-size: 0.9rem;
+            font-family: 'Outfit', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .bot-name {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        /* Bot List */
+        .bot-list {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .bot-status {
+            font-size: 0.85rem;
+            opacity: 0.7;
+            margin-top: 0.25rem;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            width: 0%;
+            transition: width 1s ease-in-out;
+        }
+
+        /* Live Feed */
+        .live-feed {
+            grid-column: span 1;
+            height: 400px;
+            overflow-y: auto;
+        }
+
+        .feed-item {
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
+        }
+
+        .feed-time {
+            font-size: 0.75rem;
+            opacity: 0.5;
+            margin-bottom: 0.25rem;
+        }
+
+        /* Architecture Map */
+        .architecture-card {
+            grid-column: span 2;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .pipeline-vis {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 2rem 0;
+            position: relative;
+        }
+
+        .pipeline-vis::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 0;
+        }
+
+        .node {
+            width: 60px;
+            height: 60px;
+            background: var(--bg);
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            z-index: 1;
+            position: relative;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .node::after {
+            content: attr(data-label);
+            position: absolute;
+            top: 70px;
+            font-size: 0.7rem;
+            white-space: nowrap;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 1024px) {
+            .dashboard-grid, .bot-list {
+                grid-template-columns: 1fr;
+            }
+            .architecture-card {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">AUTOBOT FACTORY</div>
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                SYSTEM ACTIVE [PRO MODE]
+            </div>
+        </header>
+
+        <img src="content_factory_hero.png" alt="Factory Hero" class="hero-image">
+
+        <div class="dashboard-grid">
+            <!-- Bot Status Recap -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="icon-box">🧠</div>
+                    <div>
+                        <div class="bot-name">Intelligence Hub</div>
+                        <div class="bot-status">GPT-4o + Gemini 3 Pro</div>
+                    </div>
+                </div>
+                <p style="font-size: 0.9rem; opacity: 0.8;">Модели готовы к генерации сценариев и анализу трендов. Токен-лимит: 1M.</p>
+                <div class="progress-bar"><div class="progress-fill" style="width: 85%;"></div></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="icon-box">🎨</div>
+                    <div>
+                        <div class="bot-name">Visual Engine</div>
+                        <div class="bot-status">Nano Banana Pro Active</div>
+                    </div>
+                </div>
+                <p style="font-size: 0.9rem; opacity: 0.8;">Генерация фото-реалистичных персонажей. Готовность 100%.</p>
+                <div class="progress-bar"><div class="progress-fill" style="width: 100%; background: var(--success);"></div></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="icon-box">🎞️</div>
+                    <div>
+                        <div class="bot-name">Production Line</div>
+                        <div class="bot-status">EditorBot v2.1</div>
+                    </div>
+                </div>
+                <p style="font-size: 0.9rem; opacity: 0.8;">Нарезка 9:16, 8D аудио и эпичное наложение музыки.</p>
+                <div class="progress-bar"><div class="progress-fill" style="width: 60%; background: var(--warning);"></div></div>
+            </div>
+        </div>
+
+        <div class="bot-list">
+            <!-- Architecture Map -->
+            <div class="card architecture-card">
+                <div class="card-header">
+                    <div class="icon-box">🛰️</div>
+                    <div class="bot-name">Pipeline Architecture</div>
+                </div>
+                <div class="pipeline-vis">
+                    <div class="node" data-label="Trend">🔍</div>
+                    <div class="node" data-label="Visual">👤</div>
+                    <div class="node" data-label="Script">📝</div>
+                    <div class="node" data-label="Audio">🎙️</div>
+                    <div class="node" data-label="Edit">✂️</div>
+                    <div class="node" data-label="Upload">🚀</div>
+                </div>
+                <p style="margin-top: 2rem; font-size: 0.85rem; opacity: 0.6; text-align: center;">
+                    Полностью автоматизированный цикл: от идеи до публикации.
+                </p>
+            </div>
+
+            <!-- Live Activity -->
+            <div class="card live-feed">
+                <div class="card-header">
+                    <div class="icon-box">⚡</div>
+                    <div class="bot-name">Live Logs</div>
+                </div>
+                <div id="feed">
+                    <div class="feed-item">
+                        <div class="feed-time">13:28:45</div>
+                        <span style="color: var(--primary)">[VisualBot]</span> Инициализация Nano Banana Pro... OK.
+                    </div>
+                    <div class="feed-item">
+                        <div class="feed-time">13:28:10</div>
+                        <span style="color: var(--accent)">[AudioBot]</span> Обновление: Добавлена функция TTS OpenAI.
+                    </div>
+                    <div class="feed-item">
+                        <div class="feed-time">13:27:00</div>
+                        <span style="color: var(--warning)">[Dispatcher]</span> Задача ID #14: Ожидание подтверждения.
+                    </div>
+                    <div class="feed-item">
+                        <div class="feed-time">13:25:00</div>
+                        <span style="color: var(--success)">[System]</span> Ключ Gemini 3 Pro подтвержден.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer style="margin-top: 3rem; text-align: center; opacity: 0.4; font-size: 0.8rem;">
+            AUTOBOT FACTORY &copy; 2026 | Built for Maximum Content Domain Dominance
+        </footer>
+    </div>
+
+    <script>
+        // Небольшая анимация прогресс-баров при загрузке
+        window.addEventListener('load', () => {
+            const fills = document.querySelectorAll('.progress-fill');
+            // В реальности данные подтягивались бы по API
+        });
+
+        // Имитация живых логов
+        const feed = document.getElementById('feed');
+        const logs = [
+            "EditorBot: Синхронизация 8D эффектов завершена.",
+            "VisualBot: Новый промпт готов для генерации.",
+            "UploaderBot: Проверка прокси-соединения... Стабильно.",
+            "ScriptBot: Сгенерировано 15 новых описаний для TikTok."
+        ];
+
+        setInterval(() => {
+            const log = logs[Math.floor(Math.random() * logs.length)];
+            const time = new Date().toLocaleTimeString();
+            const item = document.createElement('div');
+            item.className = 'feed-item';
+            item.innerHTML = `<div class="feed-time">${time}</div><span style="color: #6366f1">[System]</span> ${log}`;
+            feed.prepend(item);
+            if(feed.children.length > 10) feed.lastElementChild.remove();
+        }, 8000);
+    </script>
+</body>
+</html>

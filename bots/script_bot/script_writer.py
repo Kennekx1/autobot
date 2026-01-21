@@ -55,6 +55,7 @@ class ScriptBot(BaseBot):
         task = self.dispatcher.get_next_task("script_captioning")
         if task:
             file_path = task["data"].get("file_path")
+            niche = task["data"].get("niche", "movie_cuts")
             # Нам нужно понять, о чем видео. Пока возьмем имя файла как контекст.
             context = os.path.basename(file_path)
             
@@ -63,11 +64,12 @@ class ScriptBot(BaseBot):
             
             if caption:
                 self.dispatcher.update_task_status(task["id"], "completed", {"caption": caption})
-                # Передаем следующему боту (Загрузчик)
-                self.dispatcher.add_task("upload_video", {
+                # Передаем всем аккаунтам в этой нише (TikTok, YT, IG)
+                self.dispatcher.add_niche_tasks("upload_video", {
                     "file_path": file_path,
                     "caption": caption
-                })
+                }, niche=niche)
+                self.logger.info(f"Задачи на загрузку созданы для всей ниши: {niche}")
             else:
                 self.dispatcher.update_task_status(task["id"], "failed")
         else:

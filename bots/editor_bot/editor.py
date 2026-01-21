@@ -10,6 +10,61 @@ class EditorBot(BaseBot):
         self.output_dir = "/home/usic/.gemini/antigravity/scratch/autobot/data/processed_videos"
         os.makedirs(self.output_dir, exist_ok=True)
 
+    def process_video_task(self, input_path: str, mode: str = "clean_cut", music_path: str = None):
+        """
+        Основной метод обработки в зависимости от режима.
+        mode: 'clean_cut' (простая нарезка) или 'epic_edit' (под музыку)
+        """
+        self.logger.info(f"Запуск монтажа в режиме: {mode}")
+        
+        # 1. Сначала нарезаем видео на сегменты
+        segments = self.slice_video(input_path)
+        processed_segments = []
+
+        for segment in segments:
+            if mode == "epic_edit" and music_path:
+                # Если режим эдита, накладываем музыку на каждый сегмент
+                final_path = self.overlay_music(segment, music_path)
+                processed_segments.append(final_path)
+            else:
+                processed_segments.append(segment)
+                
+        return processed_segments
+
+    def slice_video(self, input_path: str, segment_duration: int = 120):
+        """Метод только для нарезки и изменения формата."""
+        try:
+            clip = VideoFileClip(input_path)
+            duration = clip.duration
+            filename_base = os.path.basename(input_path).split('.')[0]
+            
+            # Приведение к 9:16
+            w, h = clip.size
+            target_ratio = 9/16
+            if w/h > target_ratio:
+                new_w = h * target_ratio
+                clip = clip.cropped(x_center=w/2, width=new_w)
+            
+            clip = clip.resized(height=1920) if clip.h < 1920 else clip
+            
+            segments = []
+            for start_t in range(0, int(duration), segment_duration):
+                end_t = min(start_t + segment_duration, duration)
+                if end_t - start_t < 10: continue
+                    
+                output_path = os.path.join(self.output_dir, f"{filename_base}_part_{start_t}.mp4")
+                subclip = clip.subclipped(start_t, end_t).resized(1.05)
+                subclip = subclip.with_effects([vfx.MultiplySpeed(1.01)])
+                
+                subclip.write_videofile(output_path, codec="libx264", audio_codec="aac", fps=30)
+                segments.append(output_path)
+                
+            clip.close()
+            return segments
+        except Exception as e:
+            self.logger.error(f"Ошибка при нарезке: {e}")
+            return []
+
     def overlay_music(self, video_path: str, music_path: str, video_volume: float = 0.3, music_volume: float = 1.0):
         """
         Накладывает фоновую музыку на видео.
@@ -56,19 +111,25 @@ class EditorBot(BaseBot):
             return []
 
     def run(self):
-        """Бот проверяет очередь на наличие задач для монтажа."""
         task = self.dispatcher.get_next_task("video_editing")
         if task:
-            input_file = task["data"].get("file_path")
+            data = task["data"]
+            input_file = data.get("file_path")
+            mode = data.get("mode", "clean_cut") # По умолчанию просто нарезка
+            music_file = data.get("music_path")
+
             if input_file and os.path.exists(input_file):
                 self.dispatcher.update_task_status(task["id"], "processing")
-                result_files = self.process_video(input_file)
+                result_files = self.process_video_task(input_file, mode, music_file)
                 
                 if result_files:
                     self.dispatcher.update_task_status(task["id"], "completed", {"processed_files": result_files})
-                    # Передаем следующему боту (описание/загрузка)
+                    niche = data.get("niche", "movie_cuts")
                     for file in result_files:
-                        self.dispatcher.add_task("script_captioning", {"file_path": file})
+                        self.dispatcher.add_task("script_captioning", {
+                            "file_path": file,
+                            "niche": niche
+                        })
                 else:
                     self.dispatcher.update_task_status(task["id"], "failed")
         else:

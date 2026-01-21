@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AUTOBOT | Управление Заводом</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0b0f19;
+            --card: #161b2c;
+            --primary: #6366f1;
+            --primary-glow: rgba(99, 102, 241, 0.4);
+            --accent: #a855f7;
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+            --border: rgba(255, 255, 255, 0.08);
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: #0d111a;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 1.5rem;
+        }
+
+        .logo-area {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 2.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            color: var(--text-dim);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 0.5rem;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--text);
+        }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.05), transparent);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px var(--primary-glow);
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--primary-glow);
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: var(--card);
+            padding: 1.5rem;
+            border-radius: 1.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-family: 'Outfit';
+        }
+
+        /* Tables & Lists */
+        .card {
+            background: var(--card);
+            border-radius: 1.5rem;
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-family: 'Outfit';
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--text-dim);
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 1rem 0;
+            font-size: 0.9rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: var(--warning);
+        }
+
+        .badge-completed {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+        }
+
+        .badge-approval {
+            background: rgba(99, 102, 241, 0.15);
+            color: var(--primary);
+        }
+
+        .approve-btn {
+            background: none;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .approve-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Section visibility */
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="logo-area">
+            <span style="font-size: 1.8rem;">🤖</span> AUTOBOT
+        </div>
+
+        <div class="nav-item active" onclick="showSection('dashboard')">🏠 Главная</div>
+        <div class="nav-item" onclick="showSection('tasks')">📋 Очередь задач</div>
+        <div class="nav-item" onclick="showSection('assets')">📂 Ресурсы</div>
+        <div class="nav-item" onclick="showSection('accounts')">👥 Аккаунты</div>
+        <div class="nav-item" onclick="showSection('settings')">⚙️ Настройки ИИ</div>
+
+        <div style="margin-top: auto;">
+            <div class="nav-item" style="opacity: 0.5;">Документация</div>
+            <div class="nav-item" style="opacity: 0.5;">Поддержка</div>
+        </div>
+    </div>
+
+    <div class="main">
+        <!-- ГЛАВНАЯ -->
+        <div id="dashboard" class="section active">
+            <div class="header">
+                <h2>Обзор системы</h2>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn" style="background: var(--accent);" onclick="openGenModal()">+ Создать
+                        ИИ-образ</button>
+                    <button class="btn" onclick="triggerTrend()">+ Поиск новых трендов</button>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Всего задач</div>
+                    <div class="stat-value" id="stat-total">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">В процессе</div>
+                    <div class="stat-value" id="stat-pending" style="color: var(--warning);">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Ждут одобрения</div>
+                    <div class="stat-value" id="stat-approval" style="color: var(--primary);">-</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Завершено</div>
+                    <div class="stat-value" id="stat-completed" style="color: var(--success);">-</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-title">Действия, ожидающие вашего одобрения</div>
+                <table id="approval-table">
+                    <thead>
+                        <tr>
+                            <th>Тип задачи</th>
+                            <th>Аккаунт</th>
+                            <th>Детали</th>
+                            <th>Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Строки будут добавлены JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ОЧЕРЕДЬ ЗАДАЧ -->
+        <div id="tasks" class="section">
+            <div class="header">
+                <h2>Полная очередь конвейера</h2>
+            </div>
+            <div class="card">
+                <table id="full-queue-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Бот / Тип</th>
+                            <th>Статус</th>
+                            <th>Создано</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- РЕСУРСЫ -->
+        <div id="assets" class="section">
+            <div class="header">
+                <h2>Библиотека ассетов</h2>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn" onclick="document.getElementById('file-upload-music').click()">+ Музыка</button>
+                    <button class="btn" style="background: var(--accent);"
+                        onclick="document.getElementById('file-upload-img').click()">+ Фото</button>
+                </div>
+                <input type="file" id="file-upload-music" style="display:none" onchange="uploadFile(this, 'music')">
+                <input type="file" id="file-upload-img" style="display:none" onchange="uploadFile(this, 'images')">
+            </div>
+
+            <div class="dashboard-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                <div class="card">
+                    <div class="card-title">🎵 Музыка (Фон)</div>
+                    <div id="music-list"
+                        style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 5px;">
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">🖼️ ИИ-Персонажи</div>
+                    <div id="image-grid"
+                        style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-height: 400px; overflow-y: auto;">
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">🎬 Финальное видео</div>
+                    <div id="video-list"
+                        style="max-height: 400px; overflow-y: auto; display: flex; flex-direction: column; gap: 5px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- МОДАЛКА ДЛЯ ВИДЕО -->
+        <div id="video-modal"
+            style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:1000; justify-content:center; align-items:center;">
+            <div
+                style="width: 350px; height: 600px; background: #000; border-radius: 20px; overflow: hidden; position: relative; border: 2px solid var(--primary);">
+                <video id="preview-player" controls style="width:100%; height:100%; object-fit: cover;"></video>
+                <button onclick="closeVideo()"
+                    style="position:absolute; top:15px; right:15px; background:rgba(255,255,255,0.2); border:none; color:white; width: 30px; height: 30px; border-radius:50%; cursor:pointer; display: flex; align-items: center; justify-content: center; font-weight: bold;">✕</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = "http://localhost:5000/api";
+
+        const statusTranslations = {
+            'pending': 'В очереди',
+            'processing': 'Обработка',
+            'completed': 'Успешно',
+            'failed': 'Ошибка',
+            'awaiting_approval': 'Ждет подтверждения'
+        };
+
+        async function updateStats() {
+            const res = await fetch(`${API_BASE}/stats`);
+            const stats = await res.json();
+            document.getElementById('stat-pending').innerText = stats.pending;
+            document.getElementById('stat-completed').innerText = stats.completed;
+            document.getElementById('stat-approval').innerText = stats.awaiting_approval;
+            document.getElementById('stat-total').innerText = stats.pending + stats.completed + stats.awaiting_approval + stats.failed;
+        }
+
+        async function updateTables() {
+            const res = await fetch(`${API_BASE}/tasks`);
+            const tasks = await res.json();
+
+            // Таблица одобрения
+            const approvalBody = document.querySelector('#approval-table tbody');
+            approvalBody.innerHTML = '';
+            tasks.filter(t => t.status === 'awaiting_approval').forEach(t => {
+                const row = `<tr>
+                    <td><b>${t.type}</b></td>
+                    <td>${t.account_id || 'Общий'}</td>
+                    <td style="font-size: 0.8rem; color: var(--text-dim)">${JSON.stringify(t.data).substring(0, 50)}...</td>
+                    <td><button class="approve-btn" onclick="approveTask(${t.id})">Одобрить и запустить</button></td>
+                </tr>`;
+                approvalBody.innerHTML += row;
+            });
+
+            // Полная очередь
+            const queueBody = document.querySelector('#full-queue-table tbody');
+            queueBody.innerHTML = '';
+            tasks.slice().reverse().forEach(t => {
+                const statusRu = statusTranslations[t.status] || t.status;
+                let actionHtml = '';
+
+                // Если задача завершена и есть путь к файлу
+                if (t.status === 'completed' && t.data && (t.data.image_path || t.data.processed_files || t.data.processed_audio || t.data.file_path)) {
+                    const filePath = t.data.image_path || (t.data.processed_files ? t.data.processed_files[0] : null) || t.data.processed_audio || t.data.file_path;
+                    if (filePath) {
+                        const relativePath = filePath.split('/data/')[1];
+                        const downloadUrl = `http://localhost:5000/media/${relativePath}`;
+                        const isVideo = filePath.endsWith('.mp4');
+
+                        actionHtml = `
+                            <div style="display:flex; gap:10px; align-items:center;">
+                                <button onclick="${isVideo ? `openVideo('${downloadUrl}')` : `window.open('${downloadUrl}')`}" class="approve-btn">Смотреть</button>
+                                <a href="${downloadUrl}" download class="approve-btn" style="border-color: var(--success); color: var(--success); text-decoration:none;">Скачать HQ</a>
+                            </div>
+                        `;
+                    }
+                }
+
+                const row = `<tr>
+                    <td style="opacity: 0.5">#${t.id}</td>
+                    <td><b>${t.type}</b></td>
+                    <td><span class="badge badge-${t.status}">${statusRu}</span></td>
+                    <td>${actionHtml}</td>
+                    <td style="opacity: 0.7">${new Date(t.created_at).toLocaleString('ru-RU')}</td>
+                </tr>`;
+                queueBody.innerHTML += row;
+            });
+        }
+
+        function openGenModal() {
+            const promptText = window.prompt("Введите описание для Nano Banana Pro:");
+            if (promptText) {
+                generateImage(promptText);
+            }
+        }
+
+        async function generateImage(promptText) {
+            await fetch(`${API_BASE}/generate/image`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: promptText, character_name: 'Test_Character' })
+            });
+            refreshData();
+        }
+
+        async function updateAccounts() {
+            const res = await fetch(`${API_BASE}/accounts`);
+            const accs = await res.json();
+            const container = document.getElementById('accounts-container');
+            if (container) {
+                container.innerHTML = '';
+                accs.forEach(a => {
+                    container.innerHTML += `<div class="stat-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-weight: 700;">${a.name}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-dim)">${a.platform.toUpperCase()} - ${a.niche}</div>
+                            </div>
+                            <div class="badge" style="background: rgba(16, 185, 129, 0.1); color: #10b981">В сети</div>
+                        </div>
+                    </div>`;
+                });
+            }
+        }
+
+        async function updateAssets() {
+            const res = await fetch(`${API_BASE}/assets`);
+            const data = await res.json();
+
+            const mList = document.getElementById('music-list');
+            if (mList) mList.innerHTML = data.music.map(m => `<div style="padding:10px; background: rgba(255,255,255,0.03); border-radius: 8px; font-size:0.8rem; display: flex; justify-content: space-between; align-items: center;"><span>🎵 ${m}</span><button class="approve-btn" style="padding: 2px 8px; font-size: 0.7rem;" onclick="window.open('http://localhost:5000/media/music/${m}')">▶</button></div>`).join('');
+
+            const iGrid = document.getElementById('image-grid');
+            if (iGrid) iGrid.innerHTML = data.images.map(img => `<img src="http://localhost:5000/media/generated_images/${img}" style="width:100%; border-radius:10px; cursor:pointer; transition: 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'" onclick="window.open(this.src)">`).join('');
+
+            const vList = document.getElementById('video-list');
+            if (vList) vList.innerHTML = data.videos.map(v => `<div style="padding:10px; background: rgba(255,255,255,0.03); border-radius: 8px; font-size:0.8rem; cursor:pointer;" onclick="openVideo('http://localhost:5000/media/processed_video/${v}')">🎬 ${v}</div>`).join('');
+        }
+
+        function openVideo(url) {
+            const modal = document.getElementById('video-modal');
+            const player = document.getElementById('preview-player');
+            player.src = url;
+            modal.style.display = 'flex';
+            player.play();
+        }
+
+        function closeVideo() {
+            const modal = document.getElementById('video-modal');
+            const player = document.getElementById('preview-player');
+            player.pause();
+            modal.style.display = 'none';
+        }
+
+        async function uploadFile(input, type) {
+            if (!input.files[0]) return;
+            const file = input.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('type', type);
+
+            const btn = event.target.previousElementSibling;
+            const originalText = btn.innerText;
+            btn.innerText = 'Загрузка...';
+
+            await fetch(`${API_BASE}/assets/upload`, {
+                method: 'POST',
+                body: formData
+            });
+
+            btn.innerText = originalText;
+            updateAssets();
+        }
+
+        async function approveTask(id) {
+            await fetch(`${API_BASE}/tasks/approve/${id}`, { method: 'POST' });
+            refreshData();
+        }
+
+        async function triggerTrend() {
+            await fetch(`${API_BASE}/tasks/add`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ type: 'trend_search', data: { manual: true } })
+            });
+            refreshData();
+        }
+
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+
+            // Находим нужный пункт меню и активируем его
+            document.querySelectorAll('.nav-item').forEach(n => {
+                if (n.innerText.toLowerCase().includes(id === 'dashboard' ? 'главная' :
+                    id === 'tasks' ? 'очередь' :
+                        id === 'assets' ? 'ресурсы' : 'аккаунты')) {
+                    n.classList.add('active');
+                }
+            });
+
+            if (id === 'assets') updateAssets();
+        }
+
+        function refreshData() {
+            updateStats();
+            updateTables();
+            updateAccounts();
+            if (document.getElementById('assets').classList.contains('active')) updateAssets();
+        }
+
+        // Auto-refresh
+        setInterval(refreshData, 3000);
+        refreshData();
+    </script>
+</body>
+
+</html>

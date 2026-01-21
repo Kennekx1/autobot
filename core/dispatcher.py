@@ -45,6 +45,20 @@ class Dispatcher:
                 return task
         return None
 
+    def add_niche_tasks(self, task_type: str, data: dict, niche: str, status: str = "pending"):
+        """Добавляет задачи для всех аккаунтов в указанной нише (мультиплатформенность)."""
+        accounts_file = os.path.join(self.workspace_dir, "data/accounts.json")
+        if os.path.exists(accounts_file):
+            with open(accounts_file, 'r') as f:
+                accounts = json.load(f)
+                target_accounts = [a for a in accounts if a["niche"] == niche and a["status"] == "active"]
+                
+                for acc in target_accounts:
+                    self.add_task(task_type, data, status=status, account_id=acc["id"])
+                    print(f"[Dispatcher] Запланирована публикация для {acc['platform']} (Ниша: {niche})")
+        else:
+            print(f"[Dispatcher] Ошибка: файл аккаунтов не найден.")
+
     def update_task_status(self, task_id: int, status: str, result_data: dict = None):
         """Обновляет статус задачи и добавляет результат."""
         with open(self.queue_file, 'r+') as f:

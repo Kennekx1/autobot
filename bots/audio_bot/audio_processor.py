@@ -11,6 +11,28 @@ class AudioBot(BaseBot):
         self.output_dir = "/home/usic/.gemini/antigravity/scratch/autobot/data/processed_audio"
         os.makedirs(self.output_dir, exist_ok=True)
 
+    def generate_tts(self, text: str, voice: str = "alloy"):
+        """
+        Озвучивает текст через OpenAI TTS.
+        """
+        self.logger.info(f"Озвучка текста: {text[:50]}...")
+        try:
+            from openai import OpenAI
+            client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+            
+            output_path = os.path.join(self.output_dir, f"tts_{os.urandom(4).hex()}.mp3")
+            response = client.audio.speech.create(
+                model="tts-1",
+                voice=voice,
+                input=text
+            )
+            response.stream_to_file(output_path)
+            self.logger.info(f"Голос сохранен: {output_path}")
+            return output_path
+        except Exception as e:
+            self.logger.error(f"Ошибка TTS: {e}")
+            return None
+
     def create_8d_effect(self, input_path: str, speed: float = 0.5):
         """
         Создает эффект 8D звука (вращение вокруг головы).

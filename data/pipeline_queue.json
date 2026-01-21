@@ -1,0 +1,14 @@
+[
+    {
+        "id": 1,
+        "type": "image_generation",
+        "status": "failed",
+        "account_id": null,
+        "data": {
+            "prompt": "\u041a\u0438\u0431\u0435\u0440\u043f\u0430\u043d\u043a\u043e\u0432\u0441\u043a\u0430\u044f \u043a\u043e\u0448\u043a\u0430 \u0432 \u043d\u0435\u043e\u043d\u043e\u0432\u044b\u0445 \u043e\u0447\u043a\u0430\u0445, 8k, \u0444\u043e\u0442\u043e\u0440\u0435\u0430\u043b\u0438\u0437\u043c\u00bb",
+            "character_name": "Test_Character"
+        },
+        "created_at": "2026-01-21T14:01:26.506396",
+        "updated_at": "2026-01-21T14:09:02.441123"
+    }
+]

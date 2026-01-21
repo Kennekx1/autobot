@@ -7,20 +7,21 @@ class TrendBot(BaseBot):
         super().__init__("TrendBot")
         self.dispatcher = dispatcher
 
-    def run(self):
-        self.logger.info("Поиск актуальных трендов...")
+    def run(self, niche: str = "movie_cuts"):
+        self.logger.info(f"Поиск актуальных трендов для ниши: {niche}...")
         # Имитация поиска тренда
         time.sleep(2)
         trend_data = {
-            "topic": "AI Influencers in 2026",
-            "hashtags": ["#ai", "#future", "#contentfactory"],
-            "style": "cinematic"
+            "topic": f"Best of {niche} 2026",
+            "hashtags": ["#ai", "#trending", f"#{niche}"],
+            "style": "cinematic",
+            "niche": niche
         }
         self.logger.info(f"Найден тренд: {trend_data['topic']}")
         
         # Передаем задачу на согласование пользователю
         self.dispatcher.add_task("script_generation", trend_data, status="awaiting_approval")
-        self.logger.info("Тренд отправлен на согласование пользователю.")
+        self.logger.info(f"Тренд для ниши {niche} отправлен на согласование.")
 
 if __name__ == "__main__":
     from core.dispatcher import Dispatcher

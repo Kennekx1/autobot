@@ -1,20 +1,47 @@
 [
     {
         "id": 1,
-        "name": "cinematic_clips_01",
+        "name": "movie_cuts_tiktok",
         "platform": "tiktok",
         "niche": "movie_cuts",
         "proxy": "http://user:pass@host:port",
-        "browser_profile_path": "profiles/tk_movie_01",
+        "browser_profile_path": "profiles/tiktok_movie",
         "status": "active"
     },
     {
         "id": 2,
-        "name": "ai_animals_daily",
-        "platform": "instagram",
-        "niche": "ai_images",
+        "name": "movie_cuts_youtube",
+        "platform": "youtube",
+        "niche": "movie_cuts",
         "proxy": "http://user:pass@host:port",
-        "browser_profile_path": "profiles/ig_ai_01",
+        "browser_profile_path": "profiles/youtube_movie",
+        "status": "active"
+    },
+    {
+        "id": 3,
+        "name": "movie_cuts_reels",
+        "platform": "instagram",
+        "niche": "movie_cuts",
+        "proxy": "http://user:pass@host:port",
+        "browser_profile_path": "profiles/reels_movie",
+        "status": "active"
+    },
+    {
+        "id": 4,
+        "name": "ai_tech_tiktok",
+        "platform": "tiktok",
+        "niche": "ai_tech",
+        "proxy": "http://user:pass@host:port",
+        "browser_profile_path": "profiles/tiktok_tech",
+        "status": "active"
+    },
+    {
+        "id": 5,
+        "name": "ai_tech_youtube",
+        "platform": "youtube",
+        "niche": "ai_tech",
+        "proxy": "http://user:pass@host:port",
+        "browser_profile_path": "profiles/youtube_tech",
         "status": "active"
     }
 ]
